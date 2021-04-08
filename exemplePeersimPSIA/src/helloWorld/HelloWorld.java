@@ -4,6 +4,10 @@ import peersim.edsim.*;
 import peersim.core.*;
 import peersim.config.*;
 
+import java.util.Hashtable;
+import java.util.UUID;
+
+
 public class HelloWorld implements EDProtocol {
 
     // identifiant de la couche transport
@@ -16,7 +20,15 @@ public class HelloWorld implements EDProtocol {
     private int mypid;
 
     // le numero de noeud
-    private int nodeId;
+    private int nodeId; // comme l'IP, on peut pas changer
+
+    private long uuid = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE; // 2e id qu'on va utiliser | à
+    // déterminer au hasard
+
+    private Hashtable<Integer, Long> leftNeighborNode; // dict avec <nodeId, UUID> du left
+    private Hashtable<Integer, Long> rightNeighborNode;// dict avec <nodeId, UUID> du right
+
+    private boolean on = false;
 
     // prefixe de la couche (nom de la variable de protocole du fichier de config)
     private String prefix;
@@ -70,4 +82,19 @@ public class HelloWorld implements EDProtocol {
         return "Node " + this.nodeId;
     }
 
+    public void turnOn() {
+        this.on = true;
+    }
+
+    public void setLeftNeighborNodeId(long leftNeighborNodeId) {
+        this.leftNeighborNodeId = leftNeighborNodeId;
+    }
+
+    public void setRightNeighborNodeId(long rightNeighborNodeId) {
+        this.rightNeighborNodeId = rightNeighborNodeId;
+    }
+
+    public boolean isTurnedOff() {
+        return this.on == false;
+    }
 }
