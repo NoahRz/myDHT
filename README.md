@@ -1,3 +1,3 @@
 # myDHT
 
-DHT using PeerSim
+Designing a DHT using PeerSim

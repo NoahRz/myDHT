@@ -1,12 +1,12 @@
 package helloWorld;
 
 import peersim.edsim.*;
+import peersim.graph.NeighbourListGraph;
 import peersim.core.*;
 import peersim.config.*;
 
 import java.util.Hashtable;
 import java.util.UUID;
-
 
 public class HelloWorld implements EDProtocol {
 
@@ -25,8 +25,42 @@ public class HelloWorld implements EDProtocol {
     private long uuid = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE; // 2e id qu'on va utiliser | à
     // déterminer au hasard
 
-    private Hashtable<Integer, Long> leftNeighborNode; // dict avec <nodeId, UUID> du left
-    private Hashtable<Integer, Long> rightNeighborNode;// dict avec <nodeId, UUID> du right
+    public class NeighborNode {
+        private int id;
+        private long uuid;
+
+        public NeighborNode(int id, long uuid) {
+            this.id = id;
+            this.uuid = uuid;
+        }
+
+        public boolean isEmpty() {
+            return (this.id == 0 && this.uuid == 0L);
+        }
+
+        public int getId() {
+            return this.id;
+        }
+
+        public long getUUID() {
+            return this.uuid;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public void setUUID(long uuid) {
+            this.uuid = uuid;
+        }
+
+    }
+
+    private NeighborNode leftNeighborNode = new NeighborNode(0, 0L); // dict avec <nodeId, UUID> du
+    // left
+
+    private NeighborNode rightNeighborNode = new NeighborNode(0, 0L);// dict avec <nodeId, UUID> du
+    // right
 
     private boolean on = false;
 
@@ -86,15 +120,47 @@ public class HelloWorld implements EDProtocol {
         this.on = true;
     }
 
-    public void setLeftNeighborNodeId(long leftNeighborNodeId) {
-        this.leftNeighborNodeId = leftNeighborNodeId;
+    public NeighborNode getRightNeighbour() {
+        if (this.rightNeighborNode.isEmpty()) {
+            return new NeighborNode(nodeId, uuid);
+        }
+        return this.rightNeighborNode;
     }
 
-    public void setRightNeighborNodeId(long rightNeighborNodeId) {
-        this.rightNeighborNodeId = rightNeighborNodeId;
+    public NeighborNode getLeftNeighbour() {
+        if (this.leftNeighborNode.isEmpty()) {
+            return new NeighborNode(nodeId, uuid);
+        }
+        return this.leftNeighborNode;
     }
 
     public boolean isTurnedOff() {
-        return this.on == false;
+        return !this.on;
+    }
+
+    public boolean isTurnedOn() {
+        return this.on;
+    }
+
+    public boolean isAlone() {
+        return this.leftNeighborNode == null;
+    }
+
+    public long getUUID() {
+        return this.uuid;
+    }
+
+    public int getNodeId() {
+        return this.nodeId;
+    }
+
+    public void setLeftNeighborNode(int nodeId, long uuid) {
+        this.leftNeighborNode.setId(nodeId);
+        this.leftNeighborNode.setUUID(uuid);
+    }
+
+    public void setRightNeighborNode(int nodeId, long uuid) {
+        this.rightNeighborNode.setId(nodeId);
+        this.rightNeighborNode.setUUID(uuid);
     }
 }
