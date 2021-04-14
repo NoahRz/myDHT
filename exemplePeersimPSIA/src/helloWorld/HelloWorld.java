@@ -86,6 +86,10 @@ public class HelloWorld implements EDProtocol {
         this.on = true;
     }
 
+    public void turnOff() {
+        this.on = false;
+    }
+
     public HelloWorld getRightNeighbour() {
         if (this.rightNeighbourNode == null) {
             return this;
@@ -175,4 +179,13 @@ public class HelloWorld implements EDProtocol {
         rightNeighbourNode.setLeftNeighbourNode(leftNeighbourNode);
         leftNeighbourNode.setRightNeighbourNode(rightNeighbourNode);
     }
+
+    public void leave() {
+        this.turnOff();
+        System.out.println("left " + this.leftNeighbourNode);
+        this.leftNeighbourNode.setRightNeighbourNode(this.rightNeighbourNode);
+        System.out.println("right " + this.rightNeighbourNode);
+        this.rightNeighbourNode.setLeftNeighbourNode(this.leftNeighbourNode);
+    }
+
 }

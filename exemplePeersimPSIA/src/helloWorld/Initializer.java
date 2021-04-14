@@ -45,6 +45,8 @@ public class Initializer implements peersim.core.Control { // myDHT
 		this.joinNode(this.randomNode());
 		this.joinNode(this.randomNode());
 
+		// this.leaveNode(nodeId);
+
 		// pour chaque noeud, on fait le lien entre la couche applicative et la couche
 		// transport
 		// puis on fait envoyer au noeud 0 un message "Hello"
@@ -88,6 +90,11 @@ public class Initializer implements peersim.core.Control { // myDHT
 		HelloWorld node = (HelloWorld) Network.get(nodeId).getProtocol(this.helloWorldPid);
 		node.setTransportLayer(nodeId);
 		return node;
+	}
+
+	public void leaveNode(int nodeId) {
+		HelloWorld node = this.getNode(nodeId);
+		node.leave();
 	}
 
 	public void displayRing() {
