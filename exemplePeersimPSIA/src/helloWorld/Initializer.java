@@ -14,15 +14,15 @@ import java.util.Random;
 public class Initializer implements peersim.core.Control { // myDHT
 
 	private int helloWorldPid;
-	private int startNodeId = 0;
 	private HelloWorld startNode;
 
 	public Initializer(String prefix) {
 		// recuperation du pid de la couche applicative
 		this.helloWorldPid = Configuration.getPid(prefix + ".helloWorldProtocolPid");
-
+		int startNodeId = 0;
 		this.startNode = (HelloWorld) Network.get(startNodeId).getProtocol(this.helloWorldPid);
 		startNode.setTransportLayer(startNodeId);
+		startNode.turnOn();
 	}
 
 	public boolean execute() {
@@ -67,13 +67,7 @@ public class Initializer implements peersim.core.Control { // myDHT
 	}
 
 	public void addNode(HelloWorld node) {
-		// check if startNode is alone
-
-		if (node.getUUID() >= this.startNode.getUUID()) {
-			this.addNodeOnRightWay(node); // go to the right
-		} else {
-			this.addNodeOnLeftWay(node);
-		} // go to the left
+		this.startNode.addNeighbour(this.startNode.getNodeId(), node);
 	}
 
 	public int randomNode() {
@@ -85,7 +79,7 @@ public class Initializer implements peersim.core.Control { // myDHT
 		do {
 			nodeId = random.nextInt(max - min + 1) + min;
 		} while (this.getNode(nodeId).isTurnedOn());
-
+		System.out.println("node id :" + nodeId);
 		return nodeId;
 	}
 
@@ -95,44 +89,14 @@ public class Initializer implements peersim.core.Control { // myDHT
 		return node;
 	}
 
-	public void addNodeOnRightWay(HelloWorld node) { // OK
-		System.out.println("on right");
-		HelloWorld currentNode = this.startNode;
-
-		do {
-			currentNode = this.getNode(currentNode.getRightNeighbour().getId());
-		} while ((node.getUUID() >= currentNode.getUUID()) && (this.startNodeId != currentNode.getNodeId()));
-
-		HelloWorld prevNode = this.getNode(currentNode.getLeftNeighbour().getId());
-		currentNode.setLeftNeighborNode(node.getNodeId(), node.getUUID());
-		node.setRightNeighborNode(currentNode.getNodeId(), currentNode.getUUID());
-		prevNode.setRightNeighborNode(node.getNodeId(), node.getUUID());
-		node.setLeftNeighborNode(prevNode.getNodeId(), prevNode.getUUID());
-	}
-
-	public void addNodeOnLeftWay(HelloWorld node) {
-		System.out.println("on left");
-		HelloWorld currentNode = this.startNode;
-
-		do {
-			currentNode = this.getNode(currentNode.getLeftNeighbour().getId());
-		} while ((node.getUUID() < currentNode.getUUID()) && (this.startNodeId != currentNode.getNodeId()));
-
-		HelloWorld nextNode = this.getNode(currentNode.getRightNeighbour().getId());
-		currentNode.setRightNeighborNode(node.getNodeId(), node.getUUID());
-		node.setLeftNeighborNode(currentNode.getNodeId(), currentNode.getUUID());
-		nextNode.setLeftNeighborNode(node.getNodeId(), node.getUUID());
-		node.setRightNeighborNode(nextNode.getNodeId(), nextNode.getUUID());
-	}
-
 	public void displayRing() {
 		System.out.println("Ring :");
 		HelloWorld currentNode = this.startNode;
 		do {
 			System.out.println("node : " + currentNode.getNodeId());
-			System.out.println("left : " + currentNode.getLeftNeighbour().getId());
-			System.out.println("right : " + currentNode.getRightNeighbour().getId());
-			currentNode = this.getNode(currentNode.getRightNeighbour().getId());
+			System.out.println("left : " + currentNode.getLeftNeighbour().getNodeId());
+			System.out.println("right : " + currentNode.getRightNeighbour().getNodeId());
+			currentNode = this.getNode(currentNode.getRightNeighbour().getNodeId());
 		} while (currentNode.getNodeId() != this.startNode.getNodeId());
 	}
 }

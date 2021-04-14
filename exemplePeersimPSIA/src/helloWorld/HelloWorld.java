@@ -25,42 +25,9 @@ public class HelloWorld implements EDProtocol {
     private long uuid = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE; // 2e id qu'on va utiliser | à
     // déterminer au hasard
 
-    public class NeighborNode {
-        private int id;
-        private long uuid;
+    private HelloWorld leftNeighbourNode;
 
-        public NeighborNode(int id, long uuid) {
-            this.id = id;
-            this.uuid = uuid;
-        }
-
-        public boolean isEmpty() {
-            return (this.id == 0 && this.uuid == 0L);
-        }
-
-        public int getId() {
-            return this.id;
-        }
-
-        public long getUUID() {
-            return this.uuid;
-        }
-
-        public void setId(int id) {
-            this.id = id;
-        }
-
-        public void setUUID(long uuid) {
-            this.uuid = uuid;
-        }
-
-    }
-
-    private NeighborNode leftNeighborNode = new NeighborNode(0, 0L); // dict avec <nodeId, UUID> du
-    // left
-
-    private NeighborNode rightNeighborNode = new NeighborNode(0, 0L);// dict avec <nodeId, UUID> du
-    // right
+    private HelloWorld rightNeighbourNode;
 
     private boolean on = false;
 
@@ -120,18 +87,19 @@ public class HelloWorld implements EDProtocol {
         this.on = true;
     }
 
-    public NeighborNode getRightNeighbour() {
-        if (this.rightNeighborNode.isEmpty()) {
-            return new NeighborNode(nodeId, uuid);
+    public HelloWorld getRightNeighbour() {
+        if (this.rightNeighbourNode == null) {
+            return this;
         }
-        return this.rightNeighborNode;
+        return this.rightNeighbourNode;
+
     }
 
-    public NeighborNode getLeftNeighbour() {
-        if (this.leftNeighborNode.isEmpty()) {
-            return new NeighborNode(nodeId, uuid);
+    public HelloWorld getLeftNeighbour() {
+        if (this.leftNeighbourNode == null) {
+            return this;
         }
-        return this.leftNeighborNode;
+        return this.leftNeighbourNode;
     }
 
     public boolean isTurnedOff() {
@@ -142,10 +110,6 @@ public class HelloWorld implements EDProtocol {
         return this.on;
     }
 
-    public boolean isAlone() {
-        return this.leftNeighborNode == null;
-    }
-
     public long getUUID() {
         return this.uuid;
     }
@@ -154,13 +118,39 @@ public class HelloWorld implements EDProtocol {
         return this.nodeId;
     }
 
-    public void setLeftNeighborNode(int nodeId, long uuid) {
-        this.leftNeighborNode.setId(nodeId);
-        this.leftNeighborNode.setUUID(uuid);
+    public void setLeftNeighbourNode(HelloWorld node) {
+        this.leftNeighbourNode = node;
     }
 
-    public void setRightNeighborNode(int nodeId, long uuid) {
-        this.rightNeighborNode.setId(nodeId);
-        this.rightNeighborNode.setUUID(uuid);
+    public void setRightNeighbourNode(HelloWorld node) {
+        this.rightNeighbourNode = node;
+    }
+
+    public boolean addNeighbour(int startNodeId, HelloWorld node) {
+        if ((this.uuid < node.getUUID() && node.getUUID() <= this.getRightNeighbour().getUUID())
+                || (this.uuid < node.getUUID() && this.getRightNeighbour().getNodeId() == startNodeId)) {
+            HelloWorld rightNeighbourNode = this.getRightNeighbour();
+            this.setRightNeighbourNode(node);
+            node.setLeftNeighbourNode(this);
+            rightNeighbourNode.setLeftNeighbourNode(node);
+            node.setRightNeighbourNode(rightNeighbourNode);
+            return true;
+
+        } else if ((this.uuid >= node.getUUID() && node.getUUID() > this.getLeftNeighbour().getUUID())
+                || (this.uuid >= node.getUUID() && this.getLeftNeighbour().getNodeId() == startNodeId)) {
+            HelloWorld leftNeighbourNode = this.getLeftNeighbour();
+            this.setLeftNeighbourNode(node);
+            node.setRightNeighbourNode(this);
+            leftNeighbourNode.setRightNeighbourNode(node);
+            node.setLeftNeighbourNode(leftNeighbourNode);
+            return true;
+
+        } else if (this.uuid <= node.getUUID() && this.getRightNeighbour().getUUID() <= node.getUUID()) {
+            // we go rightward
+            return this.getRightNeighbour().addNeighbour(startNodeId, node);
+        } else {
+            // we go leftward
+            return this.getLeftNeighbour().addNeighbour(startNodeId, node);
+        }
     }
 }
