@@ -43,6 +43,7 @@ public class Initializer implements peersim.core.Control { // myDHT
 
 		this.joinNode(this.randomNode());
 		this.joinNode(this.randomNode());
+		this.joinNode(this.randomNode());
 
 		// pour chaque noeud, on fait le lien entre la couche applicative et la couche
 		// transport

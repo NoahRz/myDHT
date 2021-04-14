@@ -137,13 +137,16 @@ public class HelloWorld implements EDProtocol {
             this.setNeighbourhoodBetweenCurrentNodeAndLeftNeighbourNode(this, node, leftNeighbourNode);
             return true;
 
-        } else if (this.uuid <= node.getUUID() && this.getRightNeighbour().getUUID() <= node.getUUID()) {
-            // we go rightward
+        } else if (this.placeIsFartherRightward(node)) {
             return this.getRightNeighbour().addNeighbour(startNodeId, node);
         } else {
-            // we go leftward
+            // place is farther leftward
             return this.getLeftNeighbour().addNeighbour(startNodeId, node);
         }
+    }
+
+    public boolean placeIsFartherRightward(HelloWorld node) {
+        return this.uuid <= node.getUUID() && this.getRightNeighbour().getUUID() <= node.getUUID();
     }
 
     public boolean placeIsBetweenCurrentNodeAndRightNeighbourNode(int startNodeId, HelloWorld node) {
