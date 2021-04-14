@@ -5,7 +5,6 @@ import peersim.graph.NeighbourListGraph;
 import peersim.core.*;
 import peersim.config.*;
 
-import java.util.Hashtable;
 import java.util.UUID;
 
 public class HelloWorld implements EDProtocol {
@@ -92,7 +91,6 @@ public class HelloWorld implements EDProtocol {
             return this;
         }
         return this.rightNeighbourNode;
-
     }
 
     public HelloWorld getLeftNeighbour() {
@@ -127,22 +125,16 @@ public class HelloWorld implements EDProtocol {
     }
 
     public boolean addNeighbour(int startNodeId, HelloWorld node) {
-        if ((this.uuid < node.getUUID() && node.getUUID() <= this.getRightNeighbour().getUUID())
-                || (this.uuid < node.getUUID() && this.getRightNeighbour().getNodeId() == startNodeId)) {
+        if (this.placeIsBetweenCurrentNodeAndRightNeighbourNode(startNodeId, node)) {
             HelloWorld rightNeighbourNode = this.getRightNeighbour();
-            this.setRightNeighbourNode(node);
-            node.setLeftNeighbourNode(this);
-            rightNeighbourNode.setLeftNeighbourNode(node);
-            node.setRightNeighbourNode(rightNeighbourNode);
+
+            this.setNeighbourhoodBetweenCurrentNodeAndRightNeighbourNode(this, node, rightNeighbourNode);
             return true;
 
-        } else if ((this.uuid >= node.getUUID() && node.getUUID() > this.getLeftNeighbour().getUUID())
-                || (this.uuid >= node.getUUID() && this.getLeftNeighbour().getNodeId() == startNodeId)) {
+        } else if (placeIsBetweenCurrentNodeAndLeftNeighbourNode(startNodeId, node)) {
             HelloWorld leftNeighbourNode = this.getLeftNeighbour();
-            this.setLeftNeighbourNode(node);
-            node.setRightNeighbourNode(this);
-            leftNeighbourNode.setRightNeighbourNode(node);
-            node.setLeftNeighbourNode(leftNeighbourNode);
+
+            this.setNeighbourhoodBetweenCurrentNodeAndLeftNeighbourNode(this, node, leftNeighbourNode);
             return true;
 
         } else if (this.uuid <= node.getUUID() && this.getRightNeighbour().getUUID() <= node.getUUID()) {
@@ -152,5 +144,32 @@ public class HelloWorld implements EDProtocol {
             // we go leftward
             return this.getLeftNeighbour().addNeighbour(startNodeId, node);
         }
+    }
+
+    public boolean placeIsBetweenCurrentNodeAndRightNeighbourNode(int startNodeId, HelloWorld node) {
+        return (this.uuid < node.getUUID() && node.getUUID() <= this.getRightNeighbour().getUUID())
+                || (this.uuid < node.getUUID() && this.getRightNeighbour().getNodeId() == startNodeId);
+    }
+
+    public boolean placeIsBetweenCurrentNodeAndLeftNeighbourNode(int startNodeId, HelloWorld node) {
+        return (this.uuid >= node.getUUID() && node.getUUID() > this.getLeftNeighbour().getUUID())
+                || (this.uuid >= node.getUUID() && this.getLeftNeighbour().getNodeId() == startNodeId);
+    }
+
+    public void setNeighbourhoodBetweenCurrentNodeAndRightNeighbourNode(HelloWorld leftNeighbourNode, HelloWorld node,
+            HelloWorld rightNeighbourNode) {
+        this.setNeighbours(node, leftNeighbourNode);
+        this.setNeighbours(rightNeighbourNode, node);
+    }
+
+    public void setNeighbourhoodBetweenCurrentNodeAndLeftNeighbourNode(HelloWorld leftNeighbourNode, HelloWorld node,
+            HelloWorld rightNeighbourNode) {
+        this.setNeighbours(leftNeighbourNode, node);
+        this.setNeighbours(node, rightNeighbourNode);
+    }
+
+    public void setNeighbours(HelloWorld rightNeighbourNode, HelloWorld leftNeighbourNode) {
+        rightNeighbourNode.setLeftNeighbourNode(leftNeighbourNode);
+        leftNeighbourNode.setRightNeighbourNode(rightNeighbourNode);
     }
 }

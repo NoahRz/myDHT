@@ -67,19 +67,19 @@ public class Initializer implements peersim.core.Control { // myDHT
 	}
 
 	public void addNode(HelloWorld node) {
-		this.startNode.addNeighbour(this.startNode.getNodeId(), node);
+		int startNodeId = this.startNode.getNodeId();
+		this.startNode.addNeighbour(startNodeId, node);
 	}
 
 	public int randomNode() {
 		Random random = new Random();
 		int nodeId;
 		int min = 0;
-		int max = Network.size() - 1; // à vérifier si c'est bien -1
-
+		int max = Network.size() - 1; // check if it is -1
 		do {
 			nodeId = random.nextInt(max - min + 1) + min;
 		} while (this.getNode(nodeId).isTurnedOn());
-		System.out.println("node id :" + nodeId);
+
 		return nodeId;
 	}
 
@@ -93,10 +93,13 @@ public class Initializer implements peersim.core.Control { // myDHT
 		System.out.println("Ring :");
 		HelloWorld currentNode = this.startNode;
 		do {
-			System.out.println("node : " + currentNode.getNodeId());
-			System.out.println("left : " + currentNode.getLeftNeighbour().getNodeId());
-			System.out.println("right : " + currentNode.getRightNeighbour().getNodeId());
-			currentNode = this.getNode(currentNode.getRightNeighbour().getNodeId());
+
+			System.out.printf("node : %d | left : %d | right : %d\n", currentNode.getNodeId(),
+					currentNode.getLeftNeighbour().getNodeId(), currentNode.getRightNeighbour().getNodeId());
+
+			int currentNodeId = currentNode.getRightNeighbour().getNodeId();
+			currentNode = this.getNode(currentNodeId);
+
 		} while (currentNode.getNodeId() != this.startNode.getNodeId());
 	}
 }
