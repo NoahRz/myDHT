@@ -33,29 +33,27 @@ public class Initializer implements peersim.core.Control { // myDHT
 
 		// recuperation de la taille du reseau
 		nodeNb = Network.size();
-		// creation du message
-		helloMsg = new Message(Message.HELLOWORLD, "Hello!!");
 
 		if (nodeNb < 1) {
 			System.err.println("Network size is not positive");
 			System.exit(1);
 		}
 
+		int nodeId = this.randomNode();
+		long uuid = ((HelloWorld) Network.get(nodeId).getProtocol(this.helloWorldPid)).getUUID();
+
+		this.joinNode(nodeId);
 		this.joinNode(this.randomNode());
 		this.joinNode(this.randomNode());
-		this.joinNode(this.randomNode());
+
+		// creation du message
+		helloMsg = new Message(Message.HELLOWORLD, "Hello!!", uuid);
+
+		// sending message
+		System.out.println("send message to Node : " + nodeId);
+		this.startNode.send(helloMsg);
 
 		// this.leaveNode(nodeId);
-
-		// pour chaque noeud, on fait le lien entre la couche applicative et la couche
-		// transport
-		// puis on fait envoyer au noeud 0 un message "Hello"
-		// for (int i = 1; i < nodeNb; i++) {
-		// dest = Network.get(i);
-		// current = (HelloWorld) dest.getProtocol(this.helloWorldPid);
-		// current.setTransportLayer(i);
-		// this.startNode.send(helloMsg, dest);
-		// }
 
 		this.displayRing();
 		System.out.println("Initialization completed");
@@ -101,7 +99,7 @@ public class Initializer implements peersim.core.Control { // myDHT
 		HelloWorld currentNode = this.startNode;
 		do {
 
-			System.out.printf("node : %d | left : %d | right : %d\n", currentNode.getNodeId(),
+			System.out.printf("%s | left : %d | right : %d\n", currentNode.toString(),
 					currentNode.getLeftNeighbour().getNodeId(), currentNode.getRightNeighbour().getNodeId());
 
 			int currentNodeId = currentNode.getRightNeighbour().getNodeId();

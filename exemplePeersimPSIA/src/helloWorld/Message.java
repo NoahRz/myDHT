@@ -8,10 +8,12 @@ public class Message {
 
     private int type;
     private String content;
+    private long to;
 
-    Message(int type, String content) {
+    Message(int type, String content, long to) {
         this.type = type;
         this.content = content;
+        this.to = to;
     }
 
     public String getContent() {
@@ -20,6 +22,10 @@ public class Message {
 
     public int getType() {
         return this.type;
+    }
+
+    public long getTo() {
+        return this.to;
     }
 
 }

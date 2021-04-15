@@ -6,6 +6,7 @@ import peersim.core.*;
 import peersim.config.*;
 
 import java.util.UUID;
+import java.lang.Math;
 
 public class HelloWorld implements EDProtocol {
 
@@ -64,13 +65,24 @@ public class HelloWorld implements EDProtocol {
     }
 
     // envoi d'un message (l'envoi se fait via la couche transport)
-    public void send(Message msg, Node dest) {
+    public void send(Message msg) { // On peut qu'envoyer à ses voisins | l'adressement se fait dans le
+        // message
+        System.out.println("sender :" + this.nodeId);
+        Node dest = this.getClosestNode(msg.getTo());
         this.transport.send(getMyNode(), dest, msg, this.mypid);
     }
 
     // affichage a la reception
-    private void receive(Message msg) {
-        System.out.println(this + ": Received " + msg.getContent());
+    private void receive(Message msg) { // Deliver
+        /*
+         * Il faut regarder si le message est pour nous, sinon on le redirige vers le
+         * noeud voisin qui a le uuid le plus proche
+         */
+        if (msg.getTo() == this.uuid) {
+            System.out.println(this.nodeId + ": Received " + msg.getContent());
+        } else {
+            send(msg);
+        }
     }
 
     // retourne le noeud courant
@@ -143,8 +155,8 @@ public class HelloWorld implements EDProtocol {
 
         } else if (placeIsFartherRightward(node)) {
             return this.getRightNeighbour().addNeighbour(node);
-        } else {
-            // place is farther leftward
+        } else { // place is farther leftward
+
             return this.getLeftNeighbour().addNeighbour(node);
         }
     }
@@ -204,6 +216,14 @@ public class HelloWorld implements EDProtocol {
         this.leftNeighbourNode.setRightNeighbourNode(this.rightNeighbourNode);
         System.out.println("right " + this.rightNeighbourNode);
         this.rightNeighbourNode.setLeftNeighbourNode(this.leftNeighbourNode);
+    }
+
+    public Node getClosestNode(long uuid) {
+        long distBetweenLeftNeighbourAndDest = Math.abs(this.leftNeighbourNode.getUUID() - uuid);
+        long distBetweenRightNeigbhourAndDest = Math.abs(this.rightNeighbourNode.getUUID() - uuid);
+        return (distBetweenLeftNeighbourAndDest <= distBetweenRightNeigbhourAndDest)
+                ? Network.get(this.leftNeighbourNode.getNodeId())
+                : Network.get(this.rightNeighbourNode.getNodeId());
     }
 
 }
