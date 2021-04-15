@@ -5,6 +5,8 @@ import peersim.graph.NeighbourListGraph;
 import peersim.core.*;
 import peersim.config.*;
 
+import java.util.TreeMap;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.lang.Math;
 
@@ -22,7 +24,7 @@ public class HelloWorld implements EDProtocol {
     // le numero de noeud
     private int nodeId; // comme l'IP, on peut pas changer
 
-    private long uuid = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE; // 2e id qu'on va utiliser | à
+    private Long uuid = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE; // 2e id qu'on va utiliser | à
     // déterminer au hasard
 
     private HelloWorld leftNeighbourNode;
@@ -33,6 +35,8 @@ public class HelloWorld implements EDProtocol {
 
     // prefixe de la couche (nom de la variable de protocole du fichier de config)
     private String prefix;
+
+    private ArrayList<Data> listOfData = new ArrayList<>();
 
     public HelloWorld(String prefix) {
         this.prefix = prefix;
@@ -65,8 +69,7 @@ public class HelloWorld implements EDProtocol {
     }
 
     // envoi d'un message (l'envoi se fait via la couche transport)
-    public void send(Message msg) { // On peut qu'envoyer à ses voisins | l'adressement se fait dans le
-        // message
+    public void send(Message msg) {
         System.out.println("sender :" + this.nodeId);
         Node dest = this.getClosestNode(msg.getTo());
         this.transport.send(getMyNode(), dest, msg, this.mypid);
@@ -74,11 +77,7 @@ public class HelloWorld implements EDProtocol {
 
     // affichage a la reception
     private void receive(Message msg) { // Deliver
-        /*
-         * Il faut regarder si le message est pour nous, sinon on le redirige vers le
-         * noeud voisin qui a le uuid le plus proche
-         */
-        if (msg.getTo() == this.uuid) {
+        if (messageToThisNode(msg)) {
             System.out.println(this.nodeId + ": Received " + msg.getContent());
         } else {
             send(msg);
@@ -224,6 +223,36 @@ public class HelloWorld implements EDProtocol {
         return (distBetweenLeftNeighbourAndDest <= distBetweenRightNeigbhourAndDest)
                 ? Network.get(this.leftNeighbourNode.getNodeId())
                 : Network.get(this.rightNeighbourNode.getNodeId());
+    }
+
+    public boolean messageToThisNode(Message msg) {
+        return msg.getTo() == this.uuid;
+    }
+
+    /**
+     * STORING DATA
+     */
+
+    public boolean storing(Data data, int cpt, HelloWorld lastNode) {
+        HelloWorld closestNode = getClosestNodeForData(data);
+        int counter = (closestNode == lastNode) ? cpt++ : 1; // on compare bien les pointeurs
+        if (counter == 2) {
+            closestNode.store(data);
+            return true;
+        }
+        return closestNode.storing(data, counter, closestNode);
+    }
+
+    public void store(Data data) {
+        this.listOfData.add(data);
+    }
+
+    public HelloWorld getClosestNodeForData(Data data) {
+        TreeMap<Long, HelloWorld> dist = new TreeMap<Long, HelloWorld>();
+        dist.put(Math.abs(this.getUUID() - data.getUUID()), this);
+        dist.put(Math.abs(this.leftNeighbourNode.getUUID() - data.getUUID()), this.leftNeighbourNode);
+        dist.put(Math.abs(this.rightNeighbourNode.getUUID() - data.getUUID()), this.rightNeighbourNode);
+        return dist.firstEntry().getValue(); // take the first one because it has the shortest distance
     }
 
 }

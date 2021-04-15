@@ -8,9 +8,9 @@ public class Message {
 
     private int type;
     private String content;
-    private long to;
+    private Long to;
 
-    Message(int type, String content, long to) {
+    Message(int type, String content, Long to) {
         this.type = type;
         this.content = content;
         this.to = to;
@@ -24,7 +24,7 @@ public class Message {
         return this.type;
     }
 
-    public long getTo() {
+    public Long getTo() {
         return this.to;
     }
 

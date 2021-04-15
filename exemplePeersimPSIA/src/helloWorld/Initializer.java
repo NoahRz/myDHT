@@ -99,12 +99,17 @@ public class Initializer implements peersim.core.Control { // myDHT
 		HelloWorld currentNode = this.startNode;
 		do {
 
-			System.out.printf("%s | left : %d | right : %d\n", currentNode.toString(),
+			System.out.printf("%s \n	left : %d | right : %d\n", currentNode.toString(),
 					currentNode.getLeftNeighbour().getNodeId(), currentNode.getRightNeighbour().getNodeId());
-
+			displayData(currentNode);
 			int currentNodeId = currentNode.getRightNeighbour().getNodeId();
 			currentNode = this.getNode(currentNodeId);
 
 		} while (currentNode.getNodeId() != this.startNode.getNodeId());
+	}
+
+	public void displayData(HelloWorld node) {
+		// to continue
+
 	}
 }
