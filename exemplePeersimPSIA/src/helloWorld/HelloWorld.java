@@ -128,24 +128,24 @@ public class HelloWorld implements EDProtocol {
         this.rightNeighbourNode = node;
     }
 
-    public boolean addNeighbour(int startNodeId, HelloWorld node) {
-        if (this.placeIsBetweenCurrentNodeAndRightNeighbourNode(startNodeId, node)) {
+    public boolean addNeighbour(HelloWorld node) {
+        if (placeIsBetweenThisNodeAndHisRightNeighbourNode(node)) {
             HelloWorld rightNeighbourNode = this.getRightNeighbour();
 
             this.setNeighbourhoodBetweenCurrentNodeAndRightNeighbourNode(this, node, rightNeighbourNode);
             return true;
 
-        } else if (placeIsBetweenCurrentNodeAndLeftNeighbourNode(startNodeId, node)) {
+        } else if (placeIsBetweenThisNodeAndHisLeftNeighbourNode(node)) {
             HelloWorld leftNeighbourNode = this.getLeftNeighbour();
 
             this.setNeighbourhoodBetweenCurrentNodeAndLeftNeighbourNode(this, node, leftNeighbourNode);
             return true;
 
-        } else if (this.placeIsFartherRightward(node)) {
-            return this.getRightNeighbour().addNeighbour(startNodeId, node);
+        } else if (placeIsFartherRightward(node)) {
+            return this.getRightNeighbour().addNeighbour(node);
         } else {
             // place is farther leftward
-            return this.getLeftNeighbour().addNeighbour(startNodeId, node);
+            return this.getLeftNeighbour().addNeighbour(node);
         }
     }
 
@@ -153,14 +153,32 @@ public class HelloWorld implements EDProtocol {
         return this.uuid <= node.getUUID() && this.getRightNeighbour().getUUID() <= node.getUUID();
     }
 
-    public boolean placeIsBetweenCurrentNodeAndRightNeighbourNode(int startNodeId, HelloWorld node) {
-        return (this.uuid < node.getUUID() && node.getUUID() <= this.getRightNeighbour().getUUID())
-                || (this.uuid < node.getUUID() && this.getRightNeighbour().getNodeId() == startNodeId);
+    public boolean placeIsBetweenThisNodeAndHisRightNeighbourNode(HelloWorld node) {
+        return thisNodeIsLowerThanNodeWhichIsLowerThanRightNeighbour(node)
+                || thisNodeIsLowerThanNodeButWeArriveAtTheFirstNode(node);
     }
 
-    public boolean placeIsBetweenCurrentNodeAndLeftNeighbourNode(int startNodeId, HelloWorld node) {
-        return (this.uuid >= node.getUUID() && node.getUUID() > this.getLeftNeighbour().getUUID())
-                || (this.uuid >= node.getUUID() && this.getLeftNeighbour().getNodeId() == startNodeId);
+    public boolean placeIsBetweenThisNodeAndHisLeftNeighbourNode(HelloWorld node) {
+        return thisNodeIsHigherThanNodeWhichIsHigherThanLeftNeighbour(node)
+                || thisNodeIsHigherThanNodeButWeArriveAtTheFirstNode(node);
+    }
+
+    public boolean thisNodeIsLowerThanNodeWhichIsLowerThanRightNeighbour(HelloWorld node) {
+        return this.uuid < node.getUUID() && node.getUUID() <= this.getRightNeighbour().getUUID();
+    }
+
+    public boolean thisNodeIsLowerThanNodeButWeArriveAtTheFirstNode(HelloWorld node) { // FristNode is the node which
+                                                                                       // has the lowest UUID
+        return this.uuid < node.getUUID() && this.uuid >= this.getRightNeighbour().getUUID();
+    }
+
+    public boolean thisNodeIsHigherThanNodeWhichIsHigherThanLeftNeighbour(HelloWorld node) {
+        return this.uuid >= node.getUUID() && node.getUUID() > this.getLeftNeighbour().getUUID();
+    }
+
+    public boolean thisNodeIsHigherThanNodeButWeArriveAtTheFirstNode(HelloWorld node) { // FristNode is the node which
+                                                                                        // has the lowest UUID
+        return this.uuid >= node.getUUID() && this.uuid <= this.getLeftNeighbour().getUUID();
     }
 
     public void setNeighbourhoodBetweenCurrentNodeAndRightNeighbourNode(HelloWorld leftNeighbourNode, HelloWorld node,

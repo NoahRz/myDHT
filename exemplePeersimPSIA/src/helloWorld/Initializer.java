@@ -70,8 +70,7 @@ public class Initializer implements peersim.core.Control { // myDHT
 	}
 
 	public void addNode(HelloWorld node) {
-		int startNodeId = this.startNode.getNodeId();
-		this.startNode.addNeighbour(startNodeId, node);
+		this.startNode.addNeighbour(node);
 	}
 
 	public int randomNode() {
