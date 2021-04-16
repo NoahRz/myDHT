@@ -42,14 +42,16 @@ public class Initializer implements peersim.core.Control { // myDHT
 		/**
 		 * Creating ring : Join
 		 */
-		int nodeId = this.randomNode();
 
 		System.out.println("\nCreating ring ...");
-		this.joinNode(nodeId);
-		this.joinNode(this.randomNode());
-		this.joinNode(this.randomNode());
-		this.joinNode(this.randomNode());
-		this.joinNode(this.randomNode());
+		/*
+		 * int nodeId = this.randomNode(); this.joinNode(nodeId);
+		 * this.joinNode(this.randomNode()); this.joinNode(this.randomNode());
+		 * this.joinNode(this.randomNode()); this.joinNode(this.randomNode());
+		 */
+
+		int nbActiveNode = 5;
+		this.generateRing(nbActiveNode);
 
 		/**
 		 * Creating ring : leave
@@ -76,11 +78,11 @@ public class Initializer implements peersim.core.Control { // myDHT
 		 * Advanced routing : without cheating
 		 */
 
-		int numberOfShift = randomIntBetween(2, 6 - 1); // 1 because we do not want it chooses the right
+		int numberOfShift = randomIntBetween(3, nbActiveNode - 1); // 1 because we do not want it chooses the right
 		// neighbour and -2 because we do not want it
 		// chooses the leftNeighbour and itself, because
 		// we will do a spin on the right way
-		System.out.printf("\nnumberOfShift :%d", numberOfShift);
+		System.out.println("\nnumberOfShift :" + numberOfShift);
 		this.startNode.link(this.startNode, numberOfShift);
 
 		/**
@@ -95,6 +97,12 @@ public class Initializer implements peersim.core.Control { // myDHT
 		this.displayRing();
 		System.out.println("Initialization completed");
 		return false;
+	}
+
+	public void generateRing(int nbActiveNode) {
+		for (int i = 1; i <= nbActiveNode; i++) {
+			this.joinNode(this.randomNode());
+		}
 	}
 
 	public void joinNode(int nodeId) {
@@ -155,6 +163,5 @@ public class Initializer implements peersim.core.Control { // myDHT
 		for (Data data : node.getListOfDatas()) {
 			System.out.println("	Data : uuid :" + data.getUUID() + " content : " + data.getContent());
 		}
-
 	}
 }
