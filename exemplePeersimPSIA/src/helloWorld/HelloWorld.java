@@ -239,6 +239,8 @@ public class HelloWorld implements EDProtocol {
         int counter = (closestNode == lastNode) ? cpt + 1 : 1; // we compare pointers
         if (counter == 2) {
             closestNode.store(data);
+            closestNode.getLeftNeighbour().store(data);
+            closestNode.getRightNeighbour().store(data);
             return true;
         }
         return closestNode.storing(data, counter, closestNode);
