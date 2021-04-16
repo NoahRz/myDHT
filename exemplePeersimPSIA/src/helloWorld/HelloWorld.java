@@ -70,21 +70,6 @@ public class HelloWorld implements EDProtocol {
         this.transport = (HWTransport) Network.get(this.nodeId).getProtocol(this.transportPid);
     }
 
-    // envoi d'un message (l'envoi se fait via la couche transport)
-    public void send(Message msg) {
-        Node dest = this.getClosestNode(msg.getTo());
-        this.transport.send(getMyNode(), dest, msg, this.mypid);
-    }
-
-    // affichage a la reception
-    private void receive(Message msg) { // Deliver
-        if (messageToThisNode(msg)) {
-            System.out.println(this.nodeId + ": Received " + msg.getContent());
-        } else {
-            send(msg);
-        }
-    }
-
     // retourne le noeud courant
     private Node getMyNode() {
         return Network.get(this.nodeId);
@@ -146,6 +131,12 @@ public class HelloWorld implements EDProtocol {
     public void setRightNeighbourNode(HelloWorld node) {
         this.rightNeighbourNode = node;
     }
+
+    /**
+     * 
+     * Join/leave Node
+     * 
+     */
 
     public boolean addNeighbour(HelloWorld node) {
         if (placeIsBetweenThisNodeAndHisRightNeighbourNode(node)) {
@@ -223,12 +214,25 @@ public class HelloWorld implements EDProtocol {
         this.rightNeighbourNode.setLeftNeighbourNode(this.leftNeighbourNode);
     }
 
-    public Node getClosestNode(long uuid) {
-        long distBetweenLeftNeighbourAndDest = Math.abs(this.leftNeighbourNode.getUUID() - uuid);
-        long distBetweenRightNeigbhourAndDest = Math.abs(this.rightNeighbourNode.getUUID() - uuid);
-        return (distBetweenLeftNeighbourAndDest <= distBetweenRightNeigbhourAndDest)
-                ? Network.get(this.leftNeighbourNode.getNodeId())
-                : Network.get(this.rightNeighbourNode.getNodeId());
+    /**
+     * 
+     * send/deliver message
+     * 
+     */
+
+    // envoi d'un message (l'envoi se fait via la couche transport)
+    public void send(Message msg) {
+        Node dest = Network.get(this.getClosestNodeForUUID(msg.getTo()).getNodeId()); // to refactor
+        this.transport.send(getMyNode(), dest, msg, this.mypid);
+    }
+
+    // affichage a la reception
+    private void receive(Message msg) { // Deliver
+        if (messageToThisNode(msg)) {
+            System.out.println(this.nodeId + ": Received " + msg.getContent());
+        } else {
+            send(msg);
+        }
     }
 
     public boolean messageToThisNode(Message msg) {
@@ -244,7 +248,7 @@ public class HelloWorld implements EDProtocol {
     }
 
     public boolean storing(Data data, int cpt, HelloWorld lastNode) {
-        HelloWorld closestNode = getClosestNodeForData(data);
+        HelloWorld closestNode = getClosestNodeForUUID(data.getUUID());
         int counter = (closestNode == lastNode) ? cpt + 1 : 1; // we compare pointers
         if (counter == 2) {
             closestNode.store(data);
@@ -259,11 +263,12 @@ public class HelloWorld implements EDProtocol {
         this.listOfData.add(data);
     }
 
-    public HelloWorld getClosestNodeForData(Data data) {
+    public HelloWorld getClosestNodeForUUID(long uuid) {
         TreeMap<Long, HelloWorld> dist = new TreeMap<Long, HelloWorld>();
-        dist.put(Math.abs(this.getUUID() - data.getUUID()), this);
-        dist.put(Math.abs(this.leftNeighbourNode.getUUID() - data.getUUID()), this.leftNeighbourNode);
-        dist.put(Math.abs(this.rightNeighbourNode.getUUID() - data.getUUID()), this.rightNeighbourNode);
+        dist.put(Math.abs(this.getUUID() - uuid), this);
+        dist.put(Math.abs(this.getLeftNeighbour().getUUID() - uuid), this.getLeftNeighbour());
+        dist.put(Math.abs(this.getRightNeighbour().getUUID() - uuid), this.getRightNeighbour());
+        dist.put(Math.abs(this.getFarNeighbour().getUUID() - uuid), this.getFarNeighbour());
         return dist.firstEntry().getValue(); // take the first one because it has the shortest distance
     }
 
@@ -271,7 +276,7 @@ public class HelloWorld implements EDProtocol {
      * Advanced routing : without cheating
      */
 
-    public boolean link(HelloWorld node, int nbOfShift) {
+    public boolean link(HelloWorld node, int nbOfShift) { // 2 et 5
         int numberOfShift = nbOfShift - 1;
         if (numberOfShift == 0) {
             this.setFarNeighbour(node);

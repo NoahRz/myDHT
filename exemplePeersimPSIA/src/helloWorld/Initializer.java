@@ -73,6 +73,17 @@ public class Initializer implements peersim.core.Control { // myDHT
 		 */
 
 		/**
+		 * Advanced routing : without cheating
+		 */
+
+		int numberOfShift = randomIntBetween(2, 6 - 1); // 1 because we do not want it chooses the right
+		// neighbour and -2 because we do not want it
+		// chooses the leftNeighbour and itself, because
+		// we will do a spin on the right way
+		System.out.printf("\nnumberOfShift :%d", numberOfShift);
+		this.startNode.link(this.startNode, numberOfShift);
+
+		/**
 		 * Putting data
 		 */
 		System.out.println("\nPutting data ...");
@@ -80,17 +91,6 @@ public class Initializer implements peersim.core.Control { // myDHT
 		this.startNode.storing(new Data("Hello"), 0, this.startNode);
 		this.startNode.storing(new Data("Guten tag"), 0, this.startNode);
 		this.startNode.storing(new Data("hola"), 0, this.startNode);
-
-		/**
-		 * Advanced routing : without cheating
-		 */
-
-		int numberOfShift = randomIntBetween(1, 6 - 2); // 1 because we do not want it chooses the right
-														// neighbour and -2 because we do not want it
-														// chooses the leftNeighbour and itself, because
-														// we will do a spin on the right way
-		System.out.printf("\nnumberOfShift :%d", numberOfShift);
-		this.startNode.link(this.startNode, numberOfShift);
 
 		this.displayRing();
 		System.out.println("Initialization completed");
