@@ -70,7 +70,6 @@ public class HelloWorld implements EDProtocol {
 
     // envoi d'un message (l'envoi se fait via la couche transport)
     public void send(Message msg) {
-        System.out.println("sender :" + this.nodeId);
         Node dest = this.getClosestNode(msg.getTo());
         this.transport.send(getMyNode(), dest, msg, this.mypid);
     }
@@ -211,9 +210,7 @@ public class HelloWorld implements EDProtocol {
 
     public void leave() {
         this.turnOff();
-        System.out.println("left " + this.leftNeighbourNode);
         this.leftNeighbourNode.setRightNeighbourNode(this.rightNeighbourNode);
-        System.out.println("right " + this.rightNeighbourNode);
         this.rightNeighbourNode.setLeftNeighbourNode(this.leftNeighbourNode);
     }
 
@@ -233,9 +230,13 @@ public class HelloWorld implements EDProtocol {
      * STORING DATA
      */
 
+    public ArrayList<Data> getListOfDatas() {
+        return this.listOfData;
+    }
+
     public boolean storing(Data data, int cpt, HelloWorld lastNode) {
         HelloWorld closestNode = getClosestNodeForData(data);
-        int counter = (closestNode == lastNode) ? cpt++ : 1; // on compare bien les pointeurs
+        int counter = (closestNode == lastNode) ? cpt + 1 : 1; // we compare pointers
         if (counter == 2) {
             closestNode.store(data);
             return true;

@@ -42,16 +42,26 @@ public class Initializer implements peersim.core.Control { // myDHT
 		int nodeId = this.randomNode();
 		long uuid = ((HelloWorld) Network.get(nodeId).getProtocol(this.helloWorldPid)).getUUID();
 
+		System.out.println("\nCreating ring ...");
 		this.joinNode(nodeId);
 		this.joinNode(this.randomNode());
 		this.joinNode(this.randomNode());
+
+		this.displayRing();
 
 		// creation du message
 		helloMsg = new Message(Message.HELLOWORLD, "Hello!!", uuid);
 
 		// sending message
-		System.out.println("send message to Node : " + nodeId);
-		this.startNode.send(helloMsg);
+		// System.out.println("send message to Node : " + nodeId);
+		// this.startNode.send(helloMsg);
+
+		System.out.println("\nPutting data ...");
+		// putting data
+		this.startNode.storing(new Data("Bonjour"), 0, this.startNode);
+		this.startNode.storing(new Data("Hello"), 0, this.startNode);
+		this.startNode.storing(new Data("Guten tag"), 0, this.startNode);
+		this.startNode.storing(new Data("hola"), 0, this.startNode);
 
 		// this.leaveNode(nodeId);
 
@@ -109,7 +119,9 @@ public class Initializer implements peersim.core.Control { // myDHT
 	}
 
 	public void displayData(HelloWorld node) {
-		// to continue
+		for (Data data : node.getListOfDatas()) {
+			System.out.println("	Data : uuid :" + data.getUUID() + " content : " + data.getContent());
+		}
 
 	}
 }
