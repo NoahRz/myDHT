@@ -27,10 +27,10 @@ public class Initializer implements peersim.core.Control { // myDHT
 
 	public boolean execute() {
 		int nodeNb;
-		HelloWorld startNode, current;
-		Node dest;
-		Message helloMsg;
 
+		/**
+		 * Checking configuration
+		 */
 		// recuperation de la taille du reseau
 		nodeNb = Network.size();
 
@@ -39,31 +39,58 @@ public class Initializer implements peersim.core.Control { // myDHT
 			System.exit(1);
 		}
 
+		/**
+		 * Creating ring : Join
+		 */
 		int nodeId = this.randomNode();
-		long uuid = ((HelloWorld) Network.get(nodeId).getProtocol(this.helloWorldPid)).getUUID();
 
 		System.out.println("\nCreating ring ...");
 		this.joinNode(nodeId);
 		this.joinNode(this.randomNode());
 		this.joinNode(this.randomNode());
+		this.joinNode(this.randomNode());
+		this.joinNode(this.randomNode());
+
+		/**
+		 * Creating ring : leave
+		 */
+		// this.leaveNode(nodeId);
 
 		this.displayRing();
 
-		// creation du message
-		helloMsg = new Message(Message.HELLOWORLD, "Hello!!", uuid);
+		/**
+		 * Sending message
+		 */
 
-		// sending message
-		// System.out.println("send message to Node : " + nodeId);
-		// this.startNode.send(helloMsg);
+		/*
+		 * long uuid = ((HelloWorld)
+		 * Network.get(nodeId).getProtocol(this.helloWorldPid)).getUUID();
+		 * 
+		 * helloMsg = new Message(Message.HELLOWORLD, "Hello!!", uuid);
+		 * 
+		 * System.out.println("send message to Node : " + nodeId);
+		 * this.startNode.send(helloMsg);
+		 */
 
+		/**
+		 * Putting data
+		 */
 		System.out.println("\nPutting data ...");
-		// putting data
 		this.startNode.storing(new Data("Bonjour"), 0, this.startNode);
 		this.startNode.storing(new Data("Hello"), 0, this.startNode);
 		this.startNode.storing(new Data("Guten tag"), 0, this.startNode);
 		this.startNode.storing(new Data("hola"), 0, this.startNode);
 
-		// this.leaveNode(nodeId);
+		/**
+		 * Advanced routing : without cheating
+		 */
+
+		int numberOfShift = randomIntBetween(1, 6 - 2); // 1 because we do not want it chooses the right
+														// neighbour and -2 because we do not want it
+														// chooses the leftNeighbour and itself, because
+														// we will do a spin on the right way
+		System.out.printf("\nnumberOfShift :%d", numberOfShift);
+		this.startNode.link(this.startNode, numberOfShift);
 
 		this.displayRing();
 		System.out.println("Initialization completed");
@@ -79,6 +106,11 @@ public class Initializer implements peersim.core.Control { // myDHT
 
 	public void addNode(HelloWorld node) {
 		this.startNode.addNeighbour(node);
+	}
+
+	public int randomIntBetween(int min, int max) {
+		Random random = new Random();
+		return random.nextInt(max - min + 1) + min;
 	}
 
 	public int randomNode() {
@@ -105,12 +137,13 @@ public class Initializer implements peersim.core.Control { // myDHT
 	}
 
 	public void displayRing() {
-		System.out.println("Ring :");
+		System.out.println("\nRing :");
 		HelloWorld currentNode = this.startNode;
 		do {
 
-			System.out.printf("%s \n	left : %d | right : %d\n", currentNode.toString(),
-					currentNode.getLeftNeighbour().getNodeId(), currentNode.getRightNeighbour().getNodeId());
+			System.out.printf("%s \n	left : %d | right : %d | farNeighbour : %d\n", currentNode.toString(),
+					currentNode.getLeftNeighbour().getNodeId(), currentNode.getRightNeighbour().getNodeId(),
+					currentNode.getFarNeighbour().getNodeId());
 			displayData(currentNode);
 			int currentNodeId = currentNode.getRightNeighbour().getNodeId();
 			currentNode = this.getNode(currentNodeId);

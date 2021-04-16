@@ -31,6 +31,8 @@ public class HelloWorld implements EDProtocol {
 
     private HelloWorld rightNeighbourNode;
 
+    private HelloWorld farNeighbourNode;
+
     private boolean on = false;
 
     // prefixe de la couche (nom de la variable de protocole du fichier de config)
@@ -112,6 +114,13 @@ public class HelloWorld implements EDProtocol {
             return this;
         }
         return this.leftNeighbourNode;
+    }
+
+    public HelloWorld getFarNeighbour() {
+        if (this.farNeighbourNode == null) {
+            return this;
+        }
+        return this.farNeighbourNode;
     }
 
     public boolean isTurnedOff() {
@@ -258,4 +267,21 @@ public class HelloWorld implements EDProtocol {
         return dist.firstEntry().getValue(); // take the first one because it has the shortest distance
     }
 
+    /**
+     * Advanced routing : without cheating
+     */
+
+    public boolean link(HelloWorld node, int nbOfShift) {
+        int numberOfShift = nbOfShift - 1;
+        if (numberOfShift == 0) {
+            this.setFarNeighbour(node);
+            node.setFarNeighbour(this);
+            return true;
+        }
+        return this.rightNeighbourNode.link(node, numberOfShift);
+    }
+
+    public void setFarNeighbour(HelloWorld node) {
+        this.farNeighbourNode = node;
+    }
 }
