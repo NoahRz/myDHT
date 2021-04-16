@@ -16,14 +16,26 @@ public class Message {
         this.to = to;
     }
 
+    /**
+     * 
+     * @return the content
+     */
     public String getContent() {
         return this.content;
     }
 
+    /**
+     * 
+     * @return the type
+     */
     public int getType() {
         return this.type;
     }
 
+    /**
+     * 
+     * @return the uuid of the receiver of the message
+     */
     public Long getTo() {
         return this.to;
     }

@@ -11,10 +11,18 @@ public class Data {
         this.content = content;
     }
 
+    /**
+     * 
+     * @return the uuid
+     */
     public long getUUID() {
         return this.uuid;
     }
 
+    /**
+     * 
+     * @return the content
+     */
     public String getContent() {
         return this.content;
     }

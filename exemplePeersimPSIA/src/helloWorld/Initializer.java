@@ -99,12 +99,22 @@ public class Initializer implements peersim.core.Control { // myDHT
 		return false;
 	}
 
+	/**
+	 * generates a ring of a number of active node
+	 * 
+	 * @param nbActiveNode number of active node
+	 */
 	public void generateRing(int nbActiveNode) {
 		for (int i = 1; i <= nbActiveNode; i++) {
 			this.joinNode(this.randomNode());
 		}
 	}
 
+	/**
+	 * joins a node to the ring
+	 * 
+	 * @param nodeId id of the node who joins the ring
+	 */
 	public void joinNode(int nodeId) {
 		HelloWorld node = (HelloWorld) Network.get(nodeId).getProtocol(this.helloWorldPid);
 		node.setTransportLayer(nodeId);
@@ -112,15 +122,31 @@ public class Initializer implements peersim.core.Control { // myDHT
 		this.addNode(node);
 	}
 
+	/**
+	 * add a neighbour to the start node
+	 * 
+	 * @param node neighbour of the start node
+	 */
 	public void addNode(HelloWorld node) {
-		this.startNode.addNeighbour(node);
+		this.startNode.addNeighbour(node); // peut être à changer le nom de la méthode
 	}
 
+	/**
+	 * generates a random int between 2 numbers included
+	 * 
+	 * @param min minimum int
+	 * @param max maximum int
+	 * @return a random int
+	 */
 	public int randomIntBetween(int min, int max) {
 		Random random = new Random();
 		return random.nextInt(max - min + 1) + min;
 	}
 
+	/**
+	 * 
+	 * @return a random id of a turned off node
+	 */
 	public int randomNode() {
 		Random random = new Random();
 		int nodeId;
@@ -133,17 +159,31 @@ public class Initializer implements peersim.core.Control { // myDHT
 		return nodeId;
 	}
 
+	/**
+	 * returns the node who has the id nodeId
+	 * 
+	 * @param nodeId nodeId of the node we want to return
+	 * @return the node
+	 */
 	public HelloWorld getNode(int nodeId) {
 		HelloWorld node = (HelloWorld) Network.get(nodeId).getProtocol(this.helloWorldPid);
 		node.setTransportLayer(nodeId);
 		return node;
 	}
 
+	/**
+	 * makes the node who has the id nodeId leave
+	 * 
+	 * @param nodeId of the node we want it leaves
+	 */
 	public void leaveNode(int nodeId) {
 		HelloWorld node = this.getNode(nodeId);
 		node.leave();
 	}
 
+	/**
+	 * display the ring
+	 */
 	public void displayRing() {
 		System.out.println("\nRing :");
 		HelloWorld currentNode = this.startNode;
@@ -159,8 +199,13 @@ public class Initializer implements peersim.core.Control { // myDHT
 		} while (currentNode.getNodeId() != this.startNode.getNodeId());
 	}
 
+	/**
+	 * display the data contained in a node
+	 * 
+	 * @param node we want to display the data it contains
+	 */
 	public void displayData(HelloWorld node) {
-		for (Data data : node.getListOfDatas()) {
+		for (Data data : node.getListOfData()) {
 			System.out.println("	Data : uuid :" + data.getUUID() + " content : " + data.getContent());
 		}
 	}
