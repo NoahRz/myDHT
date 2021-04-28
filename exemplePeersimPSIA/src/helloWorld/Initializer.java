@@ -4,6 +4,12 @@ import peersim.edsim.*;
 import peersim.core.*;
 import peersim.config.*;
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.IOException;
+import java.io.File;
+import java.io.PrintWriter;
+import java.util.stream.*;
 
 /*
   Module d'initialisation de helloWorld: 
@@ -15,6 +21,7 @@ public class Initializer implements peersim.core.Control { // myDHT
 
 	private int helloWorldPid;
 	private HelloWorld startNode;
+	private List<String[]> dataLines = new ArrayList<>(); // Pour le CSV
 
 	public Initializer(String prefix) {
 		// recuperation du pid de la couche applicative
@@ -23,6 +30,7 @@ public class Initializer implements peersim.core.Control { // myDHT
 		this.startNode = (HelloWorld) Network.get(startNodeId).getProtocol(this.helloWorldPid);
 		startNode.setTransportLayer(startNodeId);
 		startNode.turnOn();
+		log(logType.NODE_JOIN);
 	}
 
 	public boolean execute() {
@@ -44,19 +52,23 @@ public class Initializer implements peersim.core.Control { // myDHT
 		 */
 
 		System.out.println("\nCreating ring ...");
-		/*
-		 * int nodeId = this.randomNode(); this.joinNode(nodeId);
-		 * this.joinNode(this.randomNode()); this.joinNode(this.randomNode());
-		 * this.joinNode(this.randomNode()); this.joinNode(this.randomNode());
-		 */
 
+		// 1st method to create ring
+		int nodeId = this.randomNode();
+		this.joinNode(nodeId);
+		log(logType.NODE_JOIN);
+		this.joinNode(this.randomNode());
+		log(logType.NODE_JOIN);
+		this.joinNode(this.randomNode());
+		log(logType.NODE_JOIN);
+		this.joinNode(this.randomNode());
+		log(logType.NODE_JOIN);
+		this.joinNode(this.randomNode());
+		log(logType.NODE_JOIN);
+
+		// 2nd method to create ring
 		int nbActiveNode = 5;
-		this.generateRing(nbActiveNode);
-
-		/**
-		 * Creating ring : leave
-		 */
-		// this.leaveNode(nodeId);
+		// this.generateRing(nbActiveNode);
 
 		this.displayRing();
 
@@ -64,38 +76,54 @@ public class Initializer implements peersim.core.Control { // myDHT
 		 * Sending message
 		 */
 
-		/*
-		 * long uuid = ((HelloWorld)
-		 * Network.get(nodeId).getProtocol(this.helloWorldPid)).getUUID();
-		 * 
-		 * helloMsg = new Message(Message.HELLOWORLD, "Hello!!", uuid);
-		 * 
-		 * System.out.println("send message to Node : " + nodeId);
-		 * this.startNode.send(helloMsg);
+		long uuid = ((HelloWorld) Network.get(nodeId).getProtocol(this.helloWorldPid)).getUUID();
+
+		Message helloMsg = new Message(Message.HELLOWORLD, "Hello!!", uuid);
+
+		System.out.println("send message to Node : " + nodeId);
+		this.startNode.send(helloMsg);
+		log(logType.MESSAGE_SEND);
+
+		/**
+		 * Creating ring : leave
 		 */
+		this.leaveNode(nodeId);
 
 		/**
 		 * Advanced routing : without cheating
 		 */
 
-		int numberOfShift = randomIntBetween(3, nbActiveNode - 1); // 1 because we do not want it chooses the right
+		// int numberOfShift = randomIntBetween(3, nbActiveNode - 1); // 1 because we do
+		// not want it chooses the right
 		// neighbour and -2 because we do not want it
 		// chooses the leftNeighbour and itself, because
 		// we will do a spin on the right way
-		System.out.println("\nnumberOfShift :" + numberOfShift);
-		this.startNode.link(this.startNode, numberOfShift);
+		// System.out.println("\nnumberOfShift :" + numberOfShift);
+		// this.startNode.link(this.startNode, numberOfShift);
+
+		// En trichant
+		// this.linkFarNeighbour(nodeId1, nodeId2);
 
 		/**
 		 * Putting data
 		 */
 		System.out.println("\nPutting data ...");
 		this.startNode.storing(new Data("Bonjour"), 0, this.startNode);
+		log(logType.DATA_PUT);
 		this.startNode.storing(new Data("Hello"), 0, this.startNode);
+		log(logType.DATA_PUT);
 		this.startNode.storing(new Data("Guten tag"), 0, this.startNode);
+		log(logType.DATA_PUT);
 		this.startNode.storing(new Data("hola"), 0, this.startNode);
+		log(logType.DATA_PUT);
 
 		this.displayRing();
 		System.out.println("Initialization completed");
+		try {
+			this.givenDataArray_whenConvertToCSV_thenOutputCreated(); // -> save csv file
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
 
@@ -107,6 +135,7 @@ public class Initializer implements peersim.core.Control { // myDHT
 	public void generateRing(int nbActiveNode) {
 		for (int i = 1; i <= nbActiveNode; i++) {
 			this.joinNode(this.randomNode());
+			log(logType.NODE_JOIN);
 		}
 	}
 
@@ -179,6 +208,7 @@ public class Initializer implements peersim.core.Control { // myDHT
 	public void leaveNode(int nodeId) {
 		HelloWorld node = this.getNode(nodeId);
 		node.leave();
+		log(logType.NODE_LEAVE);
 	}
 
 	/**
@@ -209,4 +239,73 @@ public class Initializer implements peersim.core.Control { // myDHT
 			System.out.println("	Data : uuid :" + data.getUUID() + " content : " + data.getContent());
 		}
 	}
+
+	public void linkFarNeighbour(int nodeId1, int nodeId2) {
+
+		HelloWorld node1 = this.getNode(nodeId1);
+		HelloWorld node2 = this.getNode(nodeId2);
+		if (!this.nodesAreDirectNeighbours(node1, node2)) {
+			node1.setFarNeighbour(node2);
+			node2.setFarNeighbour(node1);
+			this.log(logType.ADD_FAR_LINK);
+		}
+	}
+
+	public boolean nodesAreDirectNeighbours(HelloWorld node1, HelloWorld node2) {
+		return node1.getLeftNeighbour() == node2 || node1.getRightNeighbour() == node2;
+	}
+
+	public void givenDataArray_whenConvertToCSV_thenOutputCreated() throws IOException {
+		String csvFileName = "log.csv";
+		File csvOutputFile = new File(csvFileName);
+		try (PrintWriter pw = new PrintWriter(csvOutputFile)) {
+			dataLines.stream().map(this::convertToCSV).forEach(pw::println);
+		}
+		csvOutputFile.exists();
+	}
+
+	public String convertToCSV(String[] data) {
+		return Stream.of(data).map(this::escapeSpecialCharacters).collect(Collectors.joining(","));
+	}
+
+	public String escapeSpecialCharacters(String data) {
+		String escapedData = data.replaceAll("\\R", " ");
+		if (data.contains(",") || data.contains("\"") || data.contains("'")) {
+			data = data.replace("\"", "\"\"");
+			escapedData = "\"" + data + "\"";
+		}
+		return escapedData;
+	}
+
+	public enum logType {
+		NODE_JOIN, NODE_LEAVE, DATA_PUT, DATA_GET, ADD_FAR_LINK, MESSAGE_SEND
+	}
+
+	public void log(logType logType) {
+		switch (logType) {
+		// { nb_node, nb_data, nb_far_link, nb_messages }
+		case NODE_JOIN:
+			this.dataLines.add(new String[] { "1", "0", "0", "0" });
+			break;
+		case NODE_LEAVE:
+			this.dataLines.add(new String[] { "-1", "0", "0", "0" });
+			break;
+		case DATA_PUT:
+			this.dataLines.add(new String[] { "0", "1", "0", "0" });
+			break;
+		case DATA_GET:
+			// code block
+			break;
+		case ADD_FAR_LINK:
+			this.dataLines.add(new String[] { "0", "0", "1", "0" });
+			break;
+		case MESSAGE_SEND:
+			this.dataLines.add(new String[] { "0", "0", "0", "1" });
+			break;
+		default:
+			// code block
+		}
+
+	}
+
 }
