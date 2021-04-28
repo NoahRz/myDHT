@@ -90,19 +90,16 @@ public class Initializer implements peersim.core.Control { // myDHT
 		this.leaveNode(nodeId);
 
 		/**
+		 * Advanced routing : by cheating
+		 */
+
+		this.cheatAdvancedRouting();
+
+		/**
 		 * Advanced routing : without cheating
 		 */
 
-		// int numberOfShift = randomIntBetween(3, nbActiveNode - 1); // 1 because we do
-		// not want it chooses the right
-		// neighbour and -2 because we do not want it
-		// chooses the leftNeighbour and itself, because
-		// we will do a spin on the right way
-		// System.out.println("\nnumberOfShift :" + numberOfShift);
-		// this.startNode.link(this.startNode, numberOfShift);
-
-		// En trichant
-		// this.linkFarNeighbour(nodeId1, nodeId2);
+		this.nonCheatAdvancedRouting();
 
 		/**
 		 * Putting data
@@ -255,13 +252,41 @@ public class Initializer implements peersim.core.Control { // myDHT
 		return node1.getLeftNeighbour() == node2 || node1.getRightNeighbour() == node2;
 	}
 
+	public ArrayList<HelloWord> getActiveNodeTable() {
+		ArrayList<HelloWord> nodesTable = new ArrayList<>();
+		HelloWorld currentNode = this.startNode;
+		do {
+			nodesTable.add(currentNode);
+			currentNode = currentNode.getRightNeighbour();
+		} while (currentNode != this.startNode);
+
+		return nodesTable;
+	}
+
+	/* Advanced routing : by cheating */
+	public void cheatAdvancedRouting() {
+		nbActiveNode = this.getActiveNodeTable().length;
+		int numberOfShift = randomIntBetween(3, nbActiveNode - 1); // 3 and -1 because we dont want it chooses himself,
+																	// his reightNeighbour and his left neighbour
+		System.out.println("\nnumberOfShift :" + numberOfShift);
+		this.startNode.link(this.startNode, numberOfShift);
+		this.log(logType.ADD_FAR_LINK);
+	}
+
+	/* Advanced routing : without cheating */
+	public boolean nonCheatAdvancedRouting() {
+		return this.startNode.linkPiggybacking(this.startNode);
+	}
+
+	/* LOG */
+
 	public void givenDataArray_whenConvertToCSV_thenOutputCreated() throws IOException {
 		String csvFileName = "log.csv";
 		File csvOutputFile = new File(csvFileName);
 		try (PrintWriter pw = new PrintWriter(csvOutputFile)) {
 			dataLines.stream().map(this::convertToCSV).forEach(pw::println);
 		}
-		csvOutputFile.exists();
+		csvOutputFile.exists(); // je sais pas si utile
 	}
 
 	public String convertToCSV(String[] data) {

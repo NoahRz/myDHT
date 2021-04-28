@@ -460,6 +460,17 @@ public class HelloWorld implements EDProtocol {
         return this.rightNeighbourNode.link(node, numberOfShift);
     }
 
+    public boolean linkPiggybacking(HelloWorld node) {
+        // we go rightward
+        if (this.getRightNeighbour() == node && this.getLeftNeighbour() == node) { // on a qu'un seul noeud
+            return false;
+        } else if (this.getRightNeighbour() == node) { // on a fait un tour
+            return false;
+        } else if(){
+            
+        }
+    }
+
     /**
      * set a far neighbour (non direct neighbour)
      * 
