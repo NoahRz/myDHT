@@ -466,8 +466,8 @@ public class HelloWorld implements EDProtocol {
             return false;
         } else if (this.getRightNeighbour() == node) { // on a fait un tour
             return false;
-        } else if(){
-            
+        } else if (this.){
+
         }
     }
 
