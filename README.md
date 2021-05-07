@@ -4,7 +4,7 @@ Designing a DHT using PeerSim
 
 ## To run the project
 ```
-cd exemplePeersimPSIA
+cd DHT
 ```
 ```
 make
