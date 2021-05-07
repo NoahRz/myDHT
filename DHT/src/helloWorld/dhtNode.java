@@ -274,7 +274,7 @@ public class dhtNode implements EDProtocol {
      *         arrive at the first node (we did a spin)
      */
     public boolean thisNodeIsLowerThanNodeButWeArriveAtTheFirstNode(dhtNode node) { // FristNode is the node which
-                                                                                       // has the lowest UUID
+                                                                                    // has the lowest UUID
         return this.uuid < node.getUUID() && this.uuid >= this.getRightNeighbour().getUUID();
     }
 
@@ -295,7 +295,7 @@ public class dhtNode implements EDProtocol {
      *         arrive at the first node (we did a spin)
      */
     public boolean thisNodeIsHigherThanNodeButWeArriveAtTheFirstNode(dhtNode node) { // FristNode is the node which
-                                                                                        // has the lowest UUID
+                                                                                     // has the lowest UUID
         return this.uuid >= node.getUUID() && this.uuid <= this.getLeftNeighbour().getUUID();
     }
 
@@ -307,7 +307,7 @@ public class dhtNode implements EDProtocol {
      * @param rightNeighbourNode
      */
     public void setNeighbourhoodBetweenCurrentNodeAndRightNeighbourNode(dhtNode leftNeighbourNode, dhtNode node,
-                                                                        dhtNode rightNeighbourNode) {
+            dhtNode rightNeighbourNode) {
         this.setNeighbours(node, leftNeighbourNode);
         this.setNeighbours(rightNeighbourNode, node);
     }
@@ -320,7 +320,7 @@ public class dhtNode implements EDProtocol {
      * @param rightNeighbourNode
      */
     public void setNeighbourhoodBetweenCurrentNodeAndLeftNeighbourNode(dhtNode leftNeighbourNode, dhtNode node,
-                                                                       dhtNode rightNeighbourNode) {
+            dhtNode rightNeighbourNode) {
         this.setNeighbours(leftNeighbourNode, node);
         this.setNeighbours(node, rightNeighbourNode);
     }
@@ -357,7 +357,7 @@ public class dhtNode implements EDProtocol {
      * @param msg a message
      */
     public void send(Message msg) {
-        Node dest = Network.get(this.getClosestNodeForUUID(msg.getTo()).getNodeId()); // to refactor
+        Node dest = Network.get(this.getClosestNodeForUUID(msg.getTo()).getNodeId());
         this.transport.send(getMyNode(), dest, msg, this.mypid);
     }
 
@@ -478,11 +478,11 @@ public class dhtNode implements EDProtocol {
         if (this.thereAreMoreThan4Nodes(node, 4)) {
             dhtNode startNode = this.getRightNeighbour().getRightNeighbour();
             dhtNode endNode = this.getLeftNeighbour().getLeftNeighbour().getLeftNeighbour(); // because we go on the
-                                                                                                // right way, we do not
-                                                                                                // want the
-                                                                                                // leftneighbour of the
-                                                                                                // leftneighbour be the
-                                                                                                // farneighbour
+                                                                                             // right way, we do not
+                                                                                             // want the
+                                                                                             // leftneighbour of the
+                                                                                             // leftneighbour be the
+                                                                                             // farneighbour
             return startNode.piggyBack(node, endNode);
         } else {
             return false;
@@ -537,6 +537,10 @@ public class dhtNode implements EDProtocol {
         }
     }
 
+    /**
+     * 
+     * @return if this node is the Far neighbour
+     */
     public boolean thisIsTheFarNeighbour() {
         return (int) ((Math.random() * (1 - 4)) + 4) == 1; // generate a random int between [1:4[
     }

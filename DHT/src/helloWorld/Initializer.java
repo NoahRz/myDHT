@@ -154,7 +154,7 @@ public class Initializer implements peersim.core.Control { // myDHT
 	 * @param node neighbour of the start node
 	 */
 	public void addNode(dhtNode node) {
-		this.startNode.addNeighbour(node); // peut être à changer le nom de la méthode
+		this.startNode.addNeighbour(node);
 	}
 
 	/**
@@ -237,21 +237,11 @@ public class Initializer implements peersim.core.Control { // myDHT
 		}
 	}
 
-	public void linkFarNeighbour(int nodeId1, int nodeId2) {
-
-		dhtNode node1 = this.getNode(nodeId1);
-		dhtNode node2 = this.getNode(nodeId2);
-		if (!this.nodesAreDirectNeighbours(node1, node2)) {
-			node1.setFarNeighbour(node2);
-			node2.setFarNeighbour(node1);
-			this.log(logType.ADD_FAR_LINK);
-		}
-	}
-
-	public boolean nodesAreDirectNeighbours(dhtNode node1, dhtNode node2) {
-		return node1.getLeftNeighbour() == node2 || node1.getRightNeighbour() == node2;
-	}
-
+	/* Advanced routing : by cheating */
+	/**
+	 * 
+	 * @return list of active node
+	 */
 	public ArrayList<dhtNode> getActiveNodeTable() {
 		ArrayList<dhtNode> nodesTable = new ArrayList<>();
 		dhtNode currentNode = this.startNode;
@@ -263,7 +253,9 @@ public class Initializer implements peersim.core.Control { // myDHT
 		return nodesTable;
 	}
 
-	/* Advanced routing : by cheating */
+	/**
+	 * do the cheat advanced routing
+	 */
 	public void cheatAdvancedRouting() {
 		int nbActiveNode = this.getActiveNodeTable().size();
 		if (nbActiveNode > 4) {
@@ -278,6 +270,9 @@ public class Initializer implements peersim.core.Control { // myDHT
 	}
 
 	/* Advanced routing : without cheating */
+	/**
+	 * do the non cheat advanced routing
+	 */
 	public void nonCheatAdvancedRouting() {
 		if (this.startNode.linkPiggybacking(this.startNode)) {
 			log(logType.ADD_FAR_LINK);
@@ -286,6 +281,11 @@ public class Initializer implements peersim.core.Control { // myDHT
 
 	/* LOG */
 
+	/**
+	 * save the csv log file
+	 * 
+	 * @throws IOException
+	 */
 	public void givenDataArray_whenConvertToCSV_thenOutputCreated() throws IOException {
 		String csvFileName = "log.csv";
 		File csvOutputFile = new File(csvFileName);
@@ -295,10 +295,22 @@ public class Initializer implements peersim.core.Control { // myDHT
 		csvOutputFile.exists(); // je sais pas si utile
 	}
 
+	/**
+	 * convert array of string to csv format
+	 * 
+	 * @param data list of String
+	 * @return
+	 */
 	public String convertToCSV(String[] data) {
 		return Stream.of(data).map(this::escapeSpecialCharacters).collect(Collectors.joining(","));
 	}
 
+	/**
+	 * escape special characters
+	 * 
+	 * @param data string
+	 * @return
+	 */
 	public String escapeSpecialCharacters(String data) {
 		String escapedData = data.replaceAll("\\R", " ");
 		if (data.contains(",") || data.contains("\"") || data.contains("'")) {
@@ -312,6 +324,11 @@ public class Initializer implements peersim.core.Control { // myDHT
 		NODE_JOIN, NODE_LEAVE, DATA_PUT, DATA_GET, ADD_FAR_LINK, MESSAGE_SEND
 	}
 
+	/**
+	 * log the events
+	 * 
+	 * @param logType
+	 */
 	public void log(logType logType) {
 		switch (logType) {
 			// { nb_node, nb_data, nb_far_link, nb_messages }
