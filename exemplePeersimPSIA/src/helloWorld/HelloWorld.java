@@ -457,9 +457,8 @@ public class HelloWorld implements EDProtocol {
                 this.setFarNeighbour(node);
                 node.setFarNeighbour(this);
                 return true;
-            }
-            else {
-                return false
+            } else {
+                return false;
             }
         }
         return this.rightNeighbourNode.link(node, numberOfShift);
