@@ -106,6 +106,7 @@ public class Initializer implements peersim.core.Control { // myDHT
 		 */
 		System.out.println("\nPutting data ...");
 		this.startNode.storing(new Data("Bonjour"), 0, this.startNode);
+
 		log(logType.DATA_PUT);
 		this.startNode.storing(new Data("Hello"), 0, this.startNode);
 		log(logType.DATA_PUT);
@@ -266,16 +267,22 @@ public class Initializer implements peersim.core.Control { // myDHT
 	/* Advanced routing : by cheating */
 	public void cheatAdvancedRouting() {
 		nbActiveNode = this.getActiveNodeTable().length;
-		int numberOfShift = randomIntBetween(3, nbActiveNode - 1); // 3 and -1 because we dont want it chooses himself,
-																	// his reightNeighbour and his left neighbour
-		System.out.println("\nnumberOfShift :" + numberOfShift);
-		this.startNode.link(this.startNode, numberOfShift);
-		this.log(logType.ADD_FAR_LINK);
+		if (nbActiveNode > 4) {
+			int numberOfShift = randomIntBetween(3, nbActiveNode - 1); // 3 and -1 because we dont want it chooses
+																		// himself,
+																		// his reightNeighbour and his left neighbour
+			System.out.println("\nnumberOfShift :" + numberOfShift);
+			if (this.startNode.link(this.startNode, numberOfShift)) {
+				this.log(logType.ADD_FAR_LINK);
+			}
+		}
 	}
 
 	/* Advanced routing : without cheating */
-	public boolean nonCheatAdvancedRouting() {
-		return this.startNode.linkPiggybacking(this.startNode);
+	public void nonCheatAdvancedRouting() {
+		if (this.startNode.linkPiggybacking(this.startNode)) {
+			log(logType.ADD_FAR_LINK);
+		}
 	}
 
 	/* LOG */
@@ -308,27 +315,27 @@ public class Initializer implements peersim.core.Control { // myDHT
 
 	public void log(logType logType) {
 		switch (logType) {
-		// { nb_node, nb_data, nb_far_link, nb_messages }
-		case NODE_JOIN:
-			this.dataLines.add(new String[] { "1", "0", "0", "0" });
-			break;
-		case NODE_LEAVE:
-			this.dataLines.add(new String[] { "-1", "0", "0", "0" });
-			break;
-		case DATA_PUT:
-			this.dataLines.add(new String[] { "0", "1", "0", "0" });
-			break;
-		case DATA_GET:
-			// code block
-			break;
-		case ADD_FAR_LINK:
-			this.dataLines.add(new String[] { "0", "0", "1", "0" });
-			break;
-		case MESSAGE_SEND:
-			this.dataLines.add(new String[] { "0", "0", "0", "1" });
-			break;
-		default:
-			// code block
+			// { nb_node, nb_data, nb_far_link, nb_messages }
+			case NODE_JOIN:
+				this.dataLines.add(new String[] { "1", "0", "0", "0" });
+				break;
+			case NODE_LEAVE:
+				this.dataLines.add(new String[] { "-1", "0", "0", "0" });
+				break;
+			case DATA_PUT:
+				this.dataLines.add(new String[] { "0", "1", "0", "0" });
+				break;
+			case DATA_GET:
+				// code block
+				break;
+			case ADD_FAR_LINK:
+				this.dataLines.add(new String[] { "0", "0", "1", "0" });
+				break;
+			case MESSAGE_SEND:
+				this.dataLines.add(new String[] { "0", "0", "0", "1" });
+				break;
+			default:
+				// code block
 		}
 
 	}

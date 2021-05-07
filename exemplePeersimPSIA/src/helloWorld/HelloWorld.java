@@ -440,7 +440,7 @@ public class HelloWorld implements EDProtocol {
     }
 
     /**
-     * Advanced routing : without cheating
+     * Advanced routing : by cheating
      */
 
     /**
@@ -453,22 +453,89 @@ public class HelloWorld implements EDProtocol {
     public boolean link(HelloWorld node, int nbOfShift) { // 2 et 5
         int numberOfShift = nbOfShift - 1;
         if (numberOfShift == 0) {
-            this.setFarNeighbour(node);
-            node.setFarNeighbour(this);
-            return true;
+            if (this.farNeighbourNode == null) {
+                this.setFarNeighbour(node);
+                node.setFarNeighbour(this);
+                return true;
+            }
+            else {
+                return false
+            }
         }
         return this.rightNeighbourNode.link(node, numberOfShift);
     }
 
+    /**
+     * Advanced routing : without cheating
+     */
+
+    /**
+     * we send a piggybacking message to node
+     * 
+     * @param node
+     * @return
+     */
     public boolean linkPiggybacking(HelloWorld node) {
         // we go rightward
-        if (this.getRightNeighbour() == node && this.getLeftNeighbour() == node) { // on a qu'un seul noeud
+        if (this.thereAreMoreThan4Nodes(node, 4)) {
+            HelloWorld startNode = this.getRightNeighbour().getRightNeighbour();
+            HelloWorld endNode = this.getLeftNeighbour().getLeftNeighbour();
+            return startNode.piggyBack(node, endNode);
+        } else {
             return false;
-        } else if (this.getRightNeighbour() == node) { // on a fait un tour
-            return false;
-        } else if (this.){
-
         }
+    }
+
+    /**
+     * check if there are more than 4 nodes in the ring
+     * 
+     * @param node        node to check if we did a lap
+     * @param nbIteration number of iteration
+     * @return
+     */
+    public boolean thereAreMoreThan4Nodes(HelloWorld node, int nbIteration) {
+        if (nbIteration == 0) {
+            if (this == node) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return this.rightNeighbourNode.thereAreMoreThan4Nodes(node, nbIteration - 1);
+        }
+    }
+
+    /**
+     * 
+     * @param node
+     * @param endNode
+     * @return
+     */
+    public boolean piggyBack(HelloWorld node, HelloWorld endNode) {
+        if (this.farNeighbourNode == null) {
+            if (this == endNode) {
+                this.setFarNeighbour(node);
+                node.setFarNeighbour(this);
+                return true;
+            } else {
+                if (thisIsTheFarNeighbour()) { // une chance sur trois de choisir celui là
+                    this.setFarNeighbour(node);
+                    node.setFarNeighbour(this);
+                    return true;
+                } else {
+                    return this.rightNeighbourNode.piggyBack(node, endNode);
+                }
+            }
+        } else {
+            if (this == endNode) { // we didn't find
+                return false;
+            }
+            return this.rightNeighbourNode.piggyBack(node, endNode);
+        }
+    }
+
+    public boolean thisIsTheFarNeighbour() {
+        return (int) ((Math.random() * (1 - 4)) + 4) == 1; // generate a random int between [1:4[
     }
 
     /**
