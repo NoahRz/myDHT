@@ -1,7 +1,6 @@
 package helloWorld;
 
 import peersim.edsim.*;
-import peersim.graph.NeighbourListGraph;
 import peersim.core.*;
 import peersim.config.*;
 
@@ -10,7 +9,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 import java.lang.Math;
 
-public class HelloWorld implements EDProtocol {
+public class dhtNode implements EDProtocol {
 
     // transport layer identifier
     private int transportPid;
@@ -26,11 +25,11 @@ public class HelloWorld implements EDProtocol {
 
     private Long uuid = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE; // 2nd id
 
-    private HelloWorld leftNeighbourNode;
+    private dhtNode leftNeighbourNode;
 
-    private HelloWorld rightNeighbourNode;
+    private dhtNode rightNeighbourNode;
 
-    private HelloWorld farNeighbourNode;
+    private dhtNode farNeighbourNode;
 
     private boolean on = false;
 
@@ -39,7 +38,7 @@ public class HelloWorld implements EDProtocol {
 
     private ArrayList<Data> listOfData = new ArrayList<>();
 
-    public HelloWorld(String prefix) {
+    public dhtNode(String prefix) {
         this.prefix = prefix;
         // initialization of identifiers from the configuration file
         this.transportPid = Configuration.getPid(prefix + ".transport");
@@ -65,7 +64,7 @@ public class HelloWorld implements EDProtocol {
      */
     public Object clone() {
 
-        HelloWorld dolly = new HelloWorld(this.prefix);
+        dhtNode dolly = new dhtNode(this.prefix);
 
         return dolly;
     }
@@ -117,7 +116,7 @@ public class HelloWorld implements EDProtocol {
      * 
      * @return the right neighbour
      */
-    public HelloWorld getRightNeighbour() {
+    public dhtNode getRightNeighbour() {
         if (this.rightNeighbourNode == null) {
             return this;
         }
@@ -128,7 +127,7 @@ public class HelloWorld implements EDProtocol {
      * 
      * @return the left neighbour
      */
-    public HelloWorld getLeftNeighbour() {
+    public dhtNode getLeftNeighbour() {
         if (this.leftNeighbourNode == null) {
             return this;
         }
@@ -139,7 +138,7 @@ public class HelloWorld implements EDProtocol {
      * 
      * @return the far neighbour (not direct neighbour)
      */
-    public HelloWorld getFarNeighbour() {
+    public dhtNode getFarNeighbour() {
         if (this.farNeighbourNode == null) {
             return this;
         }
@@ -183,7 +182,7 @@ public class HelloWorld implements EDProtocol {
      * 
      * @param node the left neighbour node
      */
-    public void setLeftNeighbourNode(HelloWorld node) {
+    public void setLeftNeighbourNode(dhtNode node) {
         this.leftNeighbourNode = node;
     }
 
@@ -192,7 +191,7 @@ public class HelloWorld implements EDProtocol {
      * 
      * @param node the right neighbour node
      */
-    public void setRightNeighbourNode(HelloWorld node) {
+    public void setRightNeighbourNode(dhtNode node) {
         this.rightNeighbourNode = node;
     }
 
@@ -208,15 +207,15 @@ public class HelloWorld implements EDProtocol {
      * @param node the node to add
      * @return true if the node has been added
      */
-    public boolean addNeighbour(HelloWorld node) {
+    public boolean addNeighbour(dhtNode node) {
         if (placeIsBetweenThisNodeAndHisRightNeighbourNode(node)) {
-            HelloWorld rightNeighbourNode = this.getRightNeighbour();
+            dhtNode rightNeighbourNode = this.getRightNeighbour();
 
             this.setNeighbourhoodBetweenCurrentNodeAndRightNeighbourNode(this, node, rightNeighbourNode);
             return true;
 
         } else if (placeIsBetweenThisNodeAndHisLeftNeighbourNode(node)) {
-            HelloWorld leftNeighbourNode = this.getLeftNeighbour();
+            dhtNode leftNeighbourNode = this.getLeftNeighbour();
 
             this.setNeighbourhoodBetweenCurrentNodeAndLeftNeighbourNode(this, node, leftNeighbourNode);
             return true;
@@ -234,16 +233,16 @@ public class HelloWorld implements EDProtocol {
      * @param node node we are looking the place
      * @return if his place is farther rightward
      */
-    public boolean placeIsFartherRightward(HelloWorld node) {
+    public boolean placeIsFartherRightward(dhtNode node) {
         return this.uuid <= node.getUUID() && this.getRightNeighbour().getUUID() <= node.getUUID();
     }
 
     /**
      * 
-     * @param noden ode we are looking the place
+     * @param node node we are looking the place
      * @return if his place is between this node and his right neighbour
      */
-    public boolean placeIsBetweenThisNodeAndHisRightNeighbourNode(HelloWorld node) {
+    public boolean placeIsBetweenThisNodeAndHisRightNeighbourNode(dhtNode node) {
         return thisNodeIsLowerThanNodeWhichIsLowerThanRightNeighbour(node)
                 || thisNodeIsLowerThanNodeButWeArriveAtTheFirstNode(node);
     }
@@ -253,7 +252,7 @@ public class HelloWorld implements EDProtocol {
      * @param node node we are looking the place
      * @return if his place is between this node and his left neighbour
      */
-    public boolean placeIsBetweenThisNodeAndHisLeftNeighbourNode(HelloWorld node) {
+    public boolean placeIsBetweenThisNodeAndHisLeftNeighbourNode(dhtNode node) {
         return thisNodeIsHigherThanNodeWhichIsHigherThanLeftNeighbour(node)
                 || thisNodeIsHigherThanNodeButWeArriveAtTheFirstNode(node);
     }
@@ -264,7 +263,7 @@ public class HelloWorld implements EDProtocol {
      * @return if this node is lowe than the node we are looking the place which is
      *         lower than this node's right neighbour
      */
-    public boolean thisNodeIsLowerThanNodeWhichIsLowerThanRightNeighbour(HelloWorld node) {
+    public boolean thisNodeIsLowerThanNodeWhichIsLowerThanRightNeighbour(dhtNode node) {
         return this.uuid < node.getUUID() && node.getUUID() <= this.getRightNeighbour().getUUID();
     }
 
@@ -274,7 +273,7 @@ public class HelloWorld implements EDProtocol {
      * @return if this node is lower than the node we are looking the place but we
      *         arrive at the first node (we did a spin)
      */
-    public boolean thisNodeIsLowerThanNodeButWeArriveAtTheFirstNode(HelloWorld node) { // FristNode is the node which
+    public boolean thisNodeIsLowerThanNodeButWeArriveAtTheFirstNode(dhtNode node) { // FristNode is the node which
                                                                                        // has the lowest UUID
         return this.uuid < node.getUUID() && this.uuid >= this.getRightNeighbour().getUUID();
     }
@@ -285,7 +284,7 @@ public class HelloWorld implements EDProtocol {
      * @return if this node is higher than the node we are looking the place which
      *         is higher than this node's left neighbour
      */
-    public boolean thisNodeIsHigherThanNodeWhichIsHigherThanLeftNeighbour(HelloWorld node) {
+    public boolean thisNodeIsHigherThanNodeWhichIsHigherThanLeftNeighbour(dhtNode node) {
         return this.uuid >= node.getUUID() && node.getUUID() > this.getLeftNeighbour().getUUID();
     }
 
@@ -295,7 +294,7 @@ public class HelloWorld implements EDProtocol {
      * @return if this node is higher than the node we are looking the place bu we
      *         arrive at the first node (we did a spin)
      */
-    public boolean thisNodeIsHigherThanNodeButWeArriveAtTheFirstNode(HelloWorld node) { // FristNode is the node which
+    public boolean thisNodeIsHigherThanNodeButWeArriveAtTheFirstNode(dhtNode node) { // FristNode is the node which
                                                                                         // has the lowest UUID
         return this.uuid >= node.getUUID() && this.uuid <= this.getLeftNeighbour().getUUID();
     }
@@ -307,8 +306,8 @@ public class HelloWorld implements EDProtocol {
      * @param node
      * @param rightNeighbourNode
      */
-    public void setNeighbourhoodBetweenCurrentNodeAndRightNeighbourNode(HelloWorld leftNeighbourNode, HelloWorld node,
-            HelloWorld rightNeighbourNode) {
+    public void setNeighbourhoodBetweenCurrentNodeAndRightNeighbourNode(dhtNode leftNeighbourNode, dhtNode node,
+                                                                        dhtNode rightNeighbourNode) {
         this.setNeighbours(node, leftNeighbourNode);
         this.setNeighbours(rightNeighbourNode, node);
     }
@@ -320,8 +319,8 @@ public class HelloWorld implements EDProtocol {
      * @param node
      * @param rightNeighbourNode
      */
-    public void setNeighbourhoodBetweenCurrentNodeAndLeftNeighbourNode(HelloWorld leftNeighbourNode, HelloWorld node,
-            HelloWorld rightNeighbourNode) {
+    public void setNeighbourhoodBetweenCurrentNodeAndLeftNeighbourNode(dhtNode leftNeighbourNode, dhtNode node,
+                                                                       dhtNode rightNeighbourNode) {
         this.setNeighbours(leftNeighbourNode, node);
         this.setNeighbours(node, rightNeighbourNode);
     }
@@ -332,7 +331,7 @@ public class HelloWorld implements EDProtocol {
      * @param rightNeighbourNode
      * @param leftNeighbourNode
      */
-    public void setNeighbours(HelloWorld rightNeighbourNode, HelloWorld leftNeighbourNode) {
+    public void setNeighbours(dhtNode rightNeighbourNode, dhtNode leftNeighbourNode) {
         rightNeighbourNode.setLeftNeighbourNode(leftNeighbourNode);
         leftNeighbourNode.setRightNeighbourNode(rightNeighbourNode);
     }
@@ -404,8 +403,8 @@ public class HelloWorld implements EDProtocol {
      * @param lastNode last node we have visited
      * @return true it the data has been stored
      */
-    public boolean storing(Data data, int cpt, HelloWorld lastNode) {
-        HelloWorld closestNode = getClosestNodeForUUID(data.getUUID());
+    public boolean storing(Data data, int cpt, dhtNode lastNode) {
+        dhtNode closestNode = getClosestNodeForUUID(data.getUUID());
         int counter = (closestNode == lastNode) ? cpt + 1 : 1; // we compare pointers
         if (counter == 2) {
             closestNode.store(data);
@@ -430,8 +429,8 @@ public class HelloWorld implements EDProtocol {
      * @param uuid a uuid
      * @return return the node which has the closest uuid to uuid
      */
-    public HelloWorld getClosestNodeForUUID(long uuid) {
-        TreeMap<Long, HelloWorld> dist = new TreeMap<Long, HelloWorld>();
+    public dhtNode getClosestNodeForUUID(long uuid) {
+        TreeMap<Long, dhtNode> dist = new TreeMap<Long, dhtNode>();
         dist.put(Math.abs(this.getUUID() - uuid), this);
         dist.put(Math.abs(this.getLeftNeighbour().getUUID() - uuid), this.getLeftNeighbour());
         dist.put(Math.abs(this.getRightNeighbour().getUUID() - uuid), this.getRightNeighbour());
@@ -450,7 +449,7 @@ public class HelloWorld implements EDProtocol {
      * @param nbOfShift number of shift from the start node
      * @return true if the node has been linked
      */
-    public boolean link(HelloWorld node, int nbOfShift) { // 2 et 5
+    public boolean link(dhtNode node, int nbOfShift) { // 2 et 5
         int numberOfShift = nbOfShift - 1;
         if (numberOfShift == 0) {
             if (this.farNeighbourNode == null) {
@@ -474,11 +473,16 @@ public class HelloWorld implements EDProtocol {
      * @param node
      * @return
      */
-    public boolean linkPiggybacking(HelloWorld node) {
+    public boolean linkPiggybacking(dhtNode node) {
         // we go rightward
         if (this.thereAreMoreThan4Nodes(node, 4)) {
-            HelloWorld startNode = this.getRightNeighbour().getRightNeighbour();
-            HelloWorld endNode = this.getLeftNeighbour().getLeftNeighbour();
+            dhtNode startNode = this.getRightNeighbour().getRightNeighbour();
+            dhtNode endNode = this.getLeftNeighbour().getLeftNeighbour().getLeftNeighbour(); // because we go on the
+                                                                                                // right way, we do not
+                                                                                                // want the
+                                                                                                // leftneighbour of the
+                                                                                                // leftneighbour be the
+                                                                                                // farneighbour
             return startNode.piggyBack(node, endNode);
         } else {
             return false;
@@ -492,7 +496,7 @@ public class HelloWorld implements EDProtocol {
      * @param nbIteration number of iteration
      * @return
      */
-    public boolean thereAreMoreThan4Nodes(HelloWorld node, int nbIteration) {
+    public boolean thereAreMoreThan4Nodes(dhtNode node, int nbIteration) {
         if (nbIteration == 0) {
             if (this == node) {
                 return false;
@@ -510,7 +514,7 @@ public class HelloWorld implements EDProtocol {
      * @param endNode
      * @return
      */
-    public boolean piggyBack(HelloWorld node, HelloWorld endNode) {
+    public boolean piggyBack(dhtNode node, dhtNode endNode) {
         if (this.farNeighbourNode == null) {
             if (this == endNode) {
                 this.setFarNeighbour(node);
@@ -542,7 +546,7 @@ public class HelloWorld implements EDProtocol {
      * 
      * @param node the far neighbour
      */
-    public void setFarNeighbour(HelloWorld node) {
+    public void setFarNeighbour(dhtNode node) {
         this.farNeighbourNode = node;
     }
 }
